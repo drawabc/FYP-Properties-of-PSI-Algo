@@ -1,0 +1,14 @@
+.plotDiv {
+  display: flex;
+  min-height: 700px;
+}
+
+.plot {
+  flex: 1;
+  float: none;
+}
+
+.form.check {
+  display: flex;
+  justify-content: space-around;
+}

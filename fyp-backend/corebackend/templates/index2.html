@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+{% load extras %}
+
+{% block styles %}
+    <style>
+        .circular.blue{
+          position: relative;
+          display: inline-block;
+          cursor: pointer;
+          -webkit-user-select: none;
+          -moz-user-select: none;
+          -ms-user-select: none;
+          user-select: none;
+        }
+
+        /* The actual popup */
+        .circular.blue .popuptext {
+          visibility: hidden;
+          width: auto;
+          background-color: #555;
+          color: #fff;
+          text-align: center;
+          border-radius: 6px;
+          padding: 8px 5px;
+          position: absolute;
+          z-index: 1;
+          bottom: 125%;
+          left: 50%;
+          margin-left: -80px;
+        }
+
+        /* Popup arrow */
+        .circular.blue .popuptext::after {
+          content: "";
+          position: absolute;
+          top: 100%;
+          left: 50%;
+          margin-left: -5px;
+          border-width: 5px;
+          border-style: solid;
+          border-color: #555 transparent transparent transparent;
+        }
+
+        /* Toggle this class - hide and show the popup */
+        .circular.blue .show {
+          visibility: visible;
+          -webkit-animation: fadeIn 1s;
+          animation: fadeIn 1s;
+        }
+    </style>
+
+
+{% endblock %}
+
+{% block content %}
+        <div class="ui row" style="display: flex; justify-content:center">
+            <div class="ten wide column">
+                 <form class="ui form" method="post">
+                     {% csrf_token %}
+                     <div class="field">
+                         <label style="font-size:20px; font-weight:bold; padding-top:5px">AWGN(%)</label>
+                         <input type="number" name="awgn" label="AWGN(%)" value="{{form.awgn}}">
+                     </div>
+                     <label style="font-size:20px; font-weight:bold;">Harmonic(%)</label>
+                     <div class="three fields">
+                         {% for i in form.harmonic %}
+                            <div class="field">
+                                <label style="font-size:12px; font-weight:bold">Order {{forloop.counter|add:1}}</label>
+                                <input type="number" name="harmonics{{forloop.counter0}}" value="{{i}}">
+                            </div>
+                         {% endfor %}
+                     </div>
+                     <label style="font-size:20px; font-weight:bold;">PSMC(%) </label>
+                     <div class="three fields">
+                         {% for i in form.psmc %}
+                            <div class="field">
+                                <label style="font-size:12px; font-weight:bold">Order {{forloop.counter|add:1}}</label>
+                                <input type="number" name="psmc{{forloop.counter0}}" value="{{i}}">
+                            </div>
+                         {% endfor %}
+                     </div>
+                     <button type=submit class="ui button">Submit</button>
+                </form>
+            </div>
+        </div>
+        <div class="ui row" style="display: flex; justify-content:center">
+            <div class="twelve wide column">
+                <div id="myDiv"></div>
+            </div>
+        </div>
+        <div class="ui row" style="display: flex; justify-content:center">
+            <div class="ten wide column">
+                <table class="ui sortable celled table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>FN</th>
+                            <th>AWGN(rad)</th>
+                            <th>Harmonics(rad)</th>
+                            <th>PSMC(rad)</th>
+                            <th>Total</th>
+                            <th>Info</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for key, value in result.items %}
+                            <tr>
+                                <td>{{key}}</td>
+                                {% for val in value %}
+                                    <td>{{val}}</td>
+                                {% endfor %}
+                                <td>
+                                    <div class="circular blue ui icon button" onclick="togglePopup('{{key}}')">
+                                        <i class="exclamation circle icon"></i>
+                                        <span id="formula{{key}}" class="popuptext">
+                                            {{algo|get_item:key}}
+                                        </span>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        <script>
+            $('.icon.button').popup({
+                on: 'click'
+            });
+            function togglePopup(key){
+                var x = document.getElementById("formula"+key);
+                x.classList.toggle("show");
+            }
+        </script>
+        <script>
+            (function($) {
+                $.tablesort = function ($table, settings) {
+                    var self = this;
+                    this.$table = $table;
+                    this.$thead = this.$table.find('thead');
+                    this.settings = $.extend({}, $.tablesort.defaults, settings);
+                    this.$sortCells = this.$thead.length > 0 ? this.$thead.find('th:not(.no-sort)') : this.$table.find('th:not(.no-sort)');
+                    this.$sortCells.on('click.tablesort', function() {
+                        self.sort($(this));
+                    });
+                    this.index = null;
+                    this.$th = null;
+                    this.direction = null;
+                };
+
+                $.tablesort.prototype = {
+
+                    sort: function(th, direction) {
+                        var start = new Date(),
+                            self = this,
+                            table = this.$table,
+                            rowsContainer = table.find('tbody').length > 0 ? table.find('tbody') : table,
+                            rows = rowsContainer.find('tr').has('td, th'),
+                            cells = rows.find(':nth-child(' + (th.index() + 1) + ')').filter('td, th'),
+                            sortBy = th.data().sortBy,
+                            sortedMap = [];
+
+                        var unsortedValues = cells.map(function(idx, cell) {
+                            if (sortBy)
+                                return (typeof sortBy === 'function') ? sortBy($(th), $(cell), self) : sortBy;
+                            return ($(this).data().sortValue != null ? $(this).data().sortValue : $(this).text());
+                        });
+                        if (unsortedValues.length === 0) return;
+
+                        //click on a different column
+                        if (this.index !== th.index()) {
+                            this.direction = 'asc';
+                            this.index = th.index();
+                        }
+                        else if (direction !== 'asc' && direction !== 'desc')
+                            this.direction = this.direction === 'asc' ? 'desc' : 'asc';
+                        else
+                            this.direction = direction;
+
+                        direction = this.direction == 'asc' ? 1 : -1;
+
+                        self.$table.trigger('tablesort:start', [self]);
+                        self.log("Sorting by " + this.index + ' ' + this.direction);
+
+                        // Try to force a browser redraw
+                        self.$table.css("display");
+                        // Run sorting asynchronously on a timeout to force browser redraw after
+                        // `tablesort:start` callback. Also avoids locking up the browser too much.
+                        setTimeout(function() {
+                            self.$sortCells.removeClass(self.settings.asc + ' ' + self.settings.desc);
+                            for (var i = 0, length = unsortedValues.length; i < length; i++)
+                            {
+                                sortedMap.push({
+                                    index: i,
+                                    cell: cells[i],
+                                    row: rows[i],
+                                    value: unsortedValues[i]
+                                });
+                            }
+
+                            sortedMap.sort(function(a, b) {
+                                if (isNaN(a.value))
+                                    return self.settings.compare(a.value, b.value) * direction;
+                                else
+                                    return self.settings.compare(parseFloat(a.value), parseFloat(b.value)) * direction;
+                            });
+
+                            $.each(sortedMap, function(i, entry) {
+                                rowsContainer.append(entry.row);
+                            });
+
+                            th.addClass(self.settings[self.direction]);
+
+                            self.log('Sort finished in ' + ((new Date()).getTime() - start.getTime()) + 'ms');
+                            self.$table.trigger('tablesort:complete', [self]);
+                            //Try to force a browser redraw
+                            self.$table.css("display");
+                        }, unsortedValues.length > 2000 ? 200 : 10);
+                    },
+
+                    log: function(msg) {
+                        if(($.tablesort.DEBUG || this.settings.debug) && console && console.log) {
+                            console.log('[tablesort] ' + msg);
+                        }
+                    },
+
+                    destroy: function() {
+                        this.$sortCells.off('click.tablesort');
+                        this.$table.data('tablesort', null);
+                        return null;
+                    }
+
+                };
+
+                $.tablesort.DEBUG = false;
+
+                $.tablesort.defaults = {
+                    debug: $.tablesort.DEBUG,
+                    asc: 'sorted ascending',
+                    desc: 'sorted descending',
+                    compare: function(a, b) {
+                        if (a > b) {
+                            return 1;
+                        } else if (a < b) {
+                            return -1;
+                        } else {
+                            return 0;
+                        }
+                    }
+                };
+
+                $.fn.tablesort = function(settings) {
+                    var table, sortable, previous;
+                    return this.each(function() {
+                        table = $(this);
+                        previous = table.data('tablesort');
+                        if(previous) {
+                            previous.destroy();
+                        }
+                        table.data('tablesort', new $.tablesort(table, settings));
+                    });
+                };
+
+            })(window.Zepto || window.jQuery);
+            $('table').tablesort()
+        </script>
+        <script>
+            var data = {{ chart|safe }};
+            console.log(data);
+            var x = Object.keys(data).map( key => data[key][1]);
+            var label = Object.keys(data);
+            var y = Object.keys(data).map(key => data[key][2]);
+            var z = Object.keys(data).map(key => data[key][3]);
+
+            var trace1 = {
+                x:x, y:y, z:z, text:label,
+                mode: 'markers+text',
+                marker: {
+                    size: 5,
+                    line: {
+                    color: 'rgba(217, 217, 217, 0.14)',
+                    width: 0.5},
+                    opacity: 0.8},
+                type: 'scatter3d'
+            };
+
+            var data = [trace1];
+            var layout = {margin: {
+                l: 0,
+                r: 0,
+                b: 0,
+                t: 0
+              }};
+            Plotly.newPlot('myDiv', data, layout);
+
+        </script>
+    </div>
+{% endblock %}

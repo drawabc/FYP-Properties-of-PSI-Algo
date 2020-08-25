@@ -1,0 +1,44 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+        <script
+            src="https://code.jquery.com/jquery-3.1.1.min.js"
+            integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+            crossorigin="anonymous">
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
+        <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script type="text/javascript" id="MathJax-script" async
+          src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+        </script>
+        <title>Phase Shifting Interferometry</title>
+        {% block styles %}
+        {% endblock %}
+    </head>
+    <body>
+        <div class="ui grid">
+            <div class="ui centered row">
+                <div class="twelve wide column">
+                    <div class="ui inverted menu">
+                        <div class="header item">
+                            PSI
+                        </div>
+                        <a class="item">
+                            Home
+                        </a>
+                        <a class="item">
+                            Find Algorithm
+                        </a>
+                        <a class="item">
+                            Error Analysis
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {% block content %}
+            {% endblock %}
+        </div>
+    </body>
+</html>

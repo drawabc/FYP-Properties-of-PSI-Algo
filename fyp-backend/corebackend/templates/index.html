@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="ui grid">
+        <div class="ui row" style="display: flex; justify-content:center">
+            <div class="ten wide column">
+                 <form class="ui form" method="post">
+                     {% csrf_token %}
+                     <div class="field">
+                         <label style="font-size:20px; font-weight:bold">AWGN(%)</label>
+                         <input type="number" name="awgn" label="AWGN(%)" placeholder="0" value="0">
+                     </div>
+                     <label style="font-size:20px;font-weight:bold">Harmonics(%)</label>
+                     <div style="display:flex; justify-content:space-between">
+                         <div class="field" style="flex:1; margin:5px">
+                             <label>Order 2</label>
+                             <input type="number" name="harmonics[]" placeholder="0" value="0">
+                         </div>
+                         <div class="field" style="flex:1; margin:5px">
+                             <label>Order 3</label>
+                             <input type="number" name="harmonics[]" placeholder="0" value="0">
+                         </div>
+                         <div class="field" style="flex:1; margin:5px">
+                             <label>Order 4</label>
+                             <input type="number" name="harmonics" placeholder="0" value="0">
+                         </div>
+                     </div>
+                     <div style="display:flex; justify-content:space-between">
+                         <div class="field" style="flex:1; margin:5px">
+                             <label>Order 5</label>
+                             <input type="number" name="harmonics" placeholder="0" value="0">
+                         </div>
+                         <div class="field" style="flex:1; margin:5px">
+                             <label>Order 6</label>
+                             <input type="number" name="harmonics" placeholder="0" value="0">
+                         </div>
+                         <div class="field" style="flex:1; margin:5px">
+                             <label>Order 7</label>
+                             <input type="number" name="harmonics" placeholder="0" value="0">
+                         </div>
+                     </div>
+                     <div style="display:flex; justify-content:space-between">
+                         <div class="field" style="flex:1; margin:5px">
+                             <label>Order 8</label>
+                             <input type="number" name="harmonics" placeholder="0" value="0">
+                         </div>
+                         <div class="field" style="flex:1; margin:5px">
+                             <label>Order 9</label>
+                             <input type="number" name="harmonics" placeholder="0" value="0">
+                         </div>
+                         <div class="field" style="flex:1; margin:5px">
+                             <label>Order 10</label>
+                             <input type="number" name="harmonics" placeholder="0" value="0">
+                         </div>
+                     </div>
+                     <button type=submit class="ui button">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
